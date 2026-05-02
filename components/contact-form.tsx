@@ -1,48 +1,19 @@
 "use client"
 
-import { useState } from "react"
+import { useActionState } from "react"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
 import { Label } from "@/components/ui/label"
 import { MapPin, Phone, Mail, Clock, Send, CheckCircle } from "lucide-react"
+import { submitContact } from "@/app/actions"
 
 export function ContactForm() {
-  const [isSubmitted, setIsSubmitted] = useState(false)
-  const [isLoading, setIsLoading] = useState(false)
-
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault()
-    setIsLoading(true)
-    
-    const form = e.currentTarget
-    const formData = new FormData(form)
-    
-    try {
-      const response = await fetch("https://formspree.io/f/mnjlvkjv", {
-        method: "POST",
-        body: formData,
-        headers: {
-          Accept: "application/json",
-        },
-      })
-      
-      if (response.ok) {
-        setIsSubmitted(true)
-        form.reset()
-      } else {
-        alert("Hubo un error al enviar el mensaje. Por favor, intentalo de nuevo.")
-      }
-    } catch {
-      alert("Hubo un error al enviar el mensaje. Por favor, intentalo de nuevo.")
-    } finally {
-      setIsLoading(false)
-    }
-  }
+  const [state, formAction, isPending] = useActionState(submitContact, {})
 
   return (
-    <section id="contacto" className="py-20 sm:py-28 bg-background">
+    <section id="contacto" className="py-20 sm:py-28 bg-background" aria-label="Contacto">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Section Header */}
         <div className="text-center max-w-2xl mx-auto mb-12 sm:mb-16">
@@ -53,7 +24,7 @@ export function ContactForm() {
             Hablemos de tu proximo hogar
           </h2>
           <p className="text-muted-foreground text-lg">
-            Estamos aqui para ayudarte. Contactanos y te asesoraremos 
+            Estamos aqui para ayudarte. Contactanos y te asesoraremos
             de forma personalizada y sin compromiso.
           </p>
         </div>
@@ -132,7 +103,7 @@ export function ContactForm() {
           {/* Contact Form */}
           <Card className="border-0 shadow-lg">
             <CardContent className="p-6 sm:p-8">
-              {isSubmitted ? (
+              {state.success ? (
                 <div className="flex flex-col items-center justify-center py-12 text-center">
                   <div className="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mb-4">
                     <CheckCircle className="w-8 h-8 text-green-600" />
@@ -143,74 +114,80 @@ export function ContactForm() {
                   <p className="text-muted-foreground">
                     Gracias por contactarnos. Te responderemos lo antes posible.
                   </p>
-                  <Button 
-                    variant="outline" 
-                    className="mt-6"
-                    onClick={() => setIsSubmitted(false)}
-                  >
-                    Enviar otro mensaje
-                  </Button>
                 </div>
               ) : (
-                <form 
-                  onSubmit={handleSubmit} 
-                  className="space-y-6"
-                >
+                <form action={formAction} className="space-y-6">
                   <div className="grid sm:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="name">Nombre *</Label>
-                      <Input 
-                        id="name" 
+                      <Input
+                        id="name"
                         name="name"
-                        placeholder="Tu nombre" 
-                        required 
+                        placeholder="Tu nombre"
+                        aria-describedby={state.errors?.name ? "name-error" : undefined}
                       />
+                      {state.errors?.name && (
+                        <p id="name-error" className="text-sm text-red-500">{state.errors.name}</p>
+                      )}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="phone">Telefono *</Label>
-                      <Input 
-                        id="phone" 
+                      <Input
+                        id="phone"
                         name="phone"
                         type="tel"
-                        placeholder="+34 600 000 000" 
-                        required 
+                        placeholder="+34 600 000 000"
+                        aria-describedby={state.errors?.phone ? "phone-error" : undefined}
                       />
+                      {state.errors?.phone && (
+                        <p id="phone-error" className="text-sm text-red-500">{state.errors.phone}</p>
+                      )}
                     </div>
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="email">Email *</Label>
-                    <Input 
-                      id="email" 
+                    <Input
+                      id="email"
                       name="email"
                       type="email"
-                      placeholder="tu@email.com" 
-                      required 
+                      placeholder="tu@email.com"
+                      aria-describedby={state.errors?.email ? "email-error" : undefined}
                     />
+                    {state.errors?.email && (
+                      <p id="email-error" className="text-sm text-red-500">{state.errors.email}</p>
+                    )}
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="subject">Asunto</Label>
-                    <Input 
-                      id="subject" 
+                    <Input
+                      id="subject"
                       name="subject"
-                      placeholder="¿En que podemos ayudarte?" 
+                      placeholder="¿En que podemos ayudarte?"
                     />
                   </div>
 
                   <div className="space-y-2">
                     <Label htmlFor="message">Mensaje *</Label>
-                    <Textarea 
-                      id="message" 
+                    <Textarea
+                      id="message"
                       name="message"
                       placeholder="Cuentanos que estas buscando..."
                       rows={4}
-                      required 
+                      aria-describedby={state.errors?.message ? "message-error" : undefined}
                     />
+                    {state.errors?.message && (
+                      <p id="message-error" className="text-sm text-red-500">{state.errors.message}</p>
+                    )}
                   </div>
 
-                  <Button type="submit" className="w-full" size="lg" disabled={isLoading}>
-                    {isLoading ? (
+                  {state.errors?._form && (
+                    <p className="text-sm text-red-500">{state.errors._form}</p>
+                  )}
+
+                  <Button type="submit" className="w-full" size="lg" disabled={isPending}>
+                    {isPending ? (
                       "Enviando..."
                     ) : (
                       <>

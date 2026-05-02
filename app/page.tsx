@@ -7,7 +7,7 @@ import { WhatsAppButton } from "@/components/whatsapp-button"
 
 export default function Home() {
   return (
-    <main>
+    <main id="main-content">
       <Header />
       <Hero />
       <Properties />

@@ -28,21 +28,21 @@ export function Header() {
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden md:flex items-center gap-8">
-            <Link 
-              href="#inicio" 
+          <nav className="hidden md:flex items-center gap-8" aria-label="Navegación principal">
+            <Link
+              href="#inicio"
               className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
             >
               Inicio
             </Link>
-            <Link 
-              href="#propiedades" 
+            <Link
+              href="#propiedades"
               className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
             >
               Propiedades
             </Link>
-            <Link 
-              href="#contacto" 
+            <Link
+              href="#contacto"
               className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
             >
               Contacto
@@ -60,7 +60,8 @@ export function Header() {
           <button
             className="md:hidden p-2 text-foreground"
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            aria-label="Abrir menú"
+            aria-label={isMenuOpen ? "Cerrar menú" : "Abrir menú"}
+            aria-expanded={isMenuOpen}
           >
             {isMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -69,7 +70,7 @@ export function Header() {
         {/* Mobile Navigation */}
         {isMenuOpen && (
           <div className="md:hidden py-4 border-t border-border">
-            <nav className="flex flex-col gap-4">
+            <nav className="flex flex-col gap-4" aria-label="Navegación móvil">
               <Link 
                 href="#inicio" 
                 className="text-sm font-medium text-muted-foreground hover:text-primary transition-colors"
